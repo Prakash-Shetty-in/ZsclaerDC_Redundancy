@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Enterprise AI Travel Request — Agentic Workflow</title>
+<style>
+:root{
+  --bg:#f4f7fb;--panel:#fff;--ink:#17233b;--muted:#738096;--line:#dbe4ef;
+  --nav:#12284b;--blue:#2c6bed;--blue2:#eaf1ff;--green:#1d9a62;--greenbg:#edf9f3;
+  --orange:#d98516;--orangebg:#fff7e8;--red:#d94b52;--redbg:#fff0f1;
+  --purple:#7457d9;--purplebg:#f1edff;--shadow:0 8px 28px rgba(28,52,88,.09);
+}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
+button,input{font:inherit}.shell{min-height:100vh;display:grid;grid-template-columns:minmax(330px,40%) minmax(0,60%)}
+.left{background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:100vh}
+.top{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.brand{display:flex;align-items:center;gap:10px;font-weight:750}.brandmark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#4568dc,#7e5bef);display:grid;place-items:center;color:#fff}.tiny{font-size:11px;color:var(--muted)}
+.chat{padding:20px;flex:1;overflow:auto}.welcome{margin:30px auto 20px;max-width:520px}.welcome h1{font-size:24px;margin:0 0 6px}.welcome p{color:var(--muted);line-height:1.5;margin:0}
+.msg{max-width:88%;padding:12px 14px;border-radius:14px;margin:12px 0;line-height:1.48;font-size:14px;box-shadow:0 2px 7px rgba(31,47,74,.04)}
+.user{margin-left:auto;background:var(--blue);color:#fff;border-bottom-right-radius:4px}.ai{background:#f7f9fc;border:1px solid var(--line);border-bottom-left-radius:4px}
+.thinking{display:flex;align-items:center;gap:7px;color:#607089;font-size:13px}.dot{width:6px;height:6px;border-radius:50%;background:#7f8da1;animation:b 1.2s infinite}.dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}@keyframes b{0%,80%,100%{opacity:.3;transform:translateY(0)}40%{opacity:1;transform:translateY(-4px)}}
+.composer{border-top:1px solid var(--line);padding:14px;background:#fff}.inputwrap{display:flex;gap:8px;border:1px solid #cbd7e5;border-radius:12px;padding:8px;background:#fff}.inputwrap input{border:0;outline:0;flex:1;font-size:14px}.send{border:0;background:var(--blue);color:#fff;border-radius:9px;padding:9px 13px;font-weight:700;cursor:pointer}.send:disabled{opacity:.5;cursor:not-allowed}
+.quick{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 9px;font-size:11px;color:#53627a;cursor:pointer}
+.right{padding:18px 20px 28px;overflow:auto}.rhead{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:13px}.rhead h2{margin:0;font-size:19px}.rhead p{margin:3px 0 0;font-size:12px;color:var(--muted)}
+.controls{display:flex;gap:7px}.btn{border:1px solid #cbd7e5;background:#fff;border-radius:7px;padding:7px 10px;font-size:12px;cursor:pointer}.btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.stage{background:#fff;border:1px solid var(--line);border-radius:13px;padding:18px;box-shadow:var(--shadow);min-height:560px;position:relative}
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}.lg{font-size:10px;color:#65738a}.sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.flow{display:grid;grid-template-rows:auto auto auto auto auto;gap:15px;position:relative}
+.row{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;align-items:center}
+.node{min-width:145px;border:1px solid #cad5e3;background:#fff;border-radius:10px;padding:10px 11px;text-align:center;position:relative;transition:.28s ease;opacity:.34;transform:scale(.985)}
+.node .t{font-weight:750;font-size:12px}.node .s{font-size:10px;color:#6f7d91;margin-top:3px;line-height:1.3}.node.active{opacity:1;transform:scale(1.025);box-shadow:0 0 0 3px rgba(44,107,237,.12),0 8px 18px rgba(44,107,237,.10)}
+.node.done{opacity:1;transform:none}.node.usernode{border-color:#a8c3ef;background:#f5f9ff}.node.orch{border-color:#9ab9ef;background:#f1f6ff}.node.broker{border-color:#e4b66c;background:var(--orangebg)}.node.agent{border-color:#f2a8ac;background:#fff7f7}.node.mcp{border-color:#9ed0b4;background:#f2fbf6}.node.guard{border-color:#f2a8ac;background:#fff5f5}.node.model{border-color:#94baf4;background:#f4f8ff}.node.resource{border-color:#9ed0b4;background:#f5fbf7}
+.connector{height:18px;display:grid;place-items:center;color:#8a97aa;font-weight:800;opacity:.35;transition:.25s}.connector.active{opacity:1;color:var(--blue)}
+.agentgrid{display:grid;grid-template-columns:repeat(3,minmax(130px,1fr));gap:10px;width:100%}
+.agentwrap{display:flex;flex-direction:column;align-items:center;gap:6px}
+.badge{font-size:9px;font-weight:750;padding:3px 6px;border-radius:999px;background:#eef2f7;color:#65738a;opacity:.35;transition:.25s}.badge.active{opacity:1;background:#fff0d8;color:#956013}
+.pathrow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px}.pathbox{border:1px dashed #bfd0e4;border-radius:10px;padding:10px;background:#fbfcfe;opacity:.35;transition:.28s}.pathbox.active,.pathbox.done{opacity:1}.pathbox h4{font-size:11px;margin:0 0 7px;color:#46546b}
+.minirow{display:flex;gap:7px;flex-wrap:wrap}.mini{font-size:10px;border:1px solid var(--line);border-radius:6px;padding:6px 7px;background:#fff}
+.logpanel{margin-top:13px;border:1px solid var(--line);background:#0e1b31;color:#d7e7ff;border-radius:10px;padding:10px 12px;font-family:Consolas,Menlo,monospace;font-size:10.5px;line-height:1.5;min-height:102px}.logline{opacity:0;animation:fade .25s forwards}@keyframes fade{to{opacity:1}}
+.progress{height:5px;background:#e7edf5;border-radius:99px;overflow:hidden;margin-top:11px}.progress span{display:block;height:100%;background:var(--blue);width:0;transition:width .45s ease}
+.status{margin-top:8px;font-size:11px;color:#627087;display:flex;justify-content:space-between;gap:10px}
+@media(max-width:1000px){.shell{grid-template-columns:1fr}.left{min-height:auto}.right{padding-top:0}.stage{min-height:auto}.agentgrid{grid-template-columns:1fr}.pathrow{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <section class="left">
+    <div class="top">
+      <div class="brand"><div class="brandmark">G</div><div>Enterprise AI Assistant<div class="tiny">Connected to company knowledge & services</div></div></div>
+      <div class="tiny">Prakash • Employee</div>
+    </div>
+    <div class="chat" id="chat">
+      <div class="welcome">
+        <h1>How can I help?</h1>
+        <p>Ask a question or request an action across company knowledge, travel, finance and policy systems.</p>
+      </div>
+    </div>
+    <div class="composer">
+      <div class="inputwrap">
+        <input id="prompt" value="Book me a business trip to London, follow company policy, and charge it to my project." aria-label="Prompt"/>
+        <button class="send" id="send">Send</button>
+      </div>
+      <div class="quick">
+        <button class="chip" data-prompt="Book me a business trip to London, follow company policy, and charge it to my project.">Business travel</button>
+        <button class="chip" data-prompt="Check whether my project has budget for a London trip and give me the approved travel policy.">Budget + policy</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="right">
+    <div class="rhead">
+      <div><h2>Agentic workflow</h2><p>Backend orchestration revealed as the request executes</p></div>
+      <div class="controls"><button class="btn" id="reset">Reset</button><button class="btn primary" id="replay">Replay</button></div>
+    </div>
+
+    <div class="stage">
+      <div class="legend">
+        <span class="lg"><span class="sw" style="background:#f1f6ff;border:1px solid #9ab9ef"></span>Control / orchestration</span>
+        <span class="lg"><span class="sw" style="background:#fff7e8;border:1px solid #e4b66c"></span>AI Broker</span>
+        <span class="lg"><span class="sw" style="background:#fff7f7;border:1px solid #f2a8ac"></span>Agents</span>
+        <span class="lg"><span class="sw" style="background:#f2fbf6;border:1px solid #9ed0b4"></span>MCP / resources</span>
+        <span class="lg"><span class="sw" style="background:#fff5f5;border:1px solid #f2a8ac"></span>AI Guard</span>
+      </div>
+
+      <div class="flow">
+        <div class="row">
+          <div class="node usernode" id="nUser"><div class="t">Employee Request</div><div class="s">Natural-language business task</div></div>
+        </div>
+        <div class="connector" id="c1">↓</div>
+        <div class="row">
+          <div class="node orch" id="nOrch"><div class="t">Orchestrator Agent</div><div class="s">Decomposes request into specialist tasks</div></div>
+        </div>
+        <div class="connector" id="c2">↓ A2A via AI Broker</div>
+        <div class="row" style="width:100%">
+          <div class="node broker" id="nBrokerTop"><div class="t">AI Broker</div><div class="s">Agent identity • A2A authorization • routing • audit</div></div>
+        </div>
+        <div class="agentgrid">
+          <div class="agentwrap"><div class="badge" id="bTravel">A2A task: plan_trip</div><div class="node agent" id="nTravel"><div class="t">Travel Agent</div><div class="s">Flights • hotels • itinerary</div></div></div>
+          <div class="agentwrap"><div class="badge" id="bFinance">A2A task: validate_cost_center</div><div class="node agent" id="nFinance"><div class="t">Finance Agent</div><div class="s">Project budget • charge eligibility</div></div></div>
+          <div class="agentwrap"><div class="badge" id="bCompliance">A2A task: check_policy</div><div class="node agent" id="nCompliance"><div class="t">Compliance Agent</div><div class="s">Travel policy • limits • approvals</div></div></div>
+        </div>
+        <div class="connector" id="c3">↓ MCP via AI Broker</div>
+        <div class="row">
+          <div class="node broker" id="nBrokerBottom"><div class="t">AI Broker</div><div class="s">MCP tool authorization • least privilege</div></div>
+          <div class="node mcp" id="nMCP"><div class="t">Enterprise MCP Gateway / Servers</div><div class="s">Tool discovery • invocation • connection management</div></div>
+        </div>
+
+        <div class="pathrow">
+          <div class="pathbox" id="pResource">
+            <h4>Enterprise resource path</h4>
+            <div class="minirow">
+              <div class="mini">Travel API</div><div class="mini">ERP / Project</div><div class="mini">Policy Store</div><div class="mini">CRM / SaaS</div>
+            </div>
+          </div>
+          <div class="pathbox" id="pModel">
+            <h4>Model retrieval path</h4>
+            <div class="minirow">
+              <div class="mini">LLM-bound call</div><div class="mini">AI Guard DAS/API</div><div class="mini">LLM</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="node guard" id="nGuard"><div class="t">AI Guard DAS/API</div><div class="s">Prompt/response inspection • security verdict</div></div>
+          <div class="node model" id="nModel"><div class="t">LLM</div><div class="s">Reasoning / generation</div></div>
+        </div>
+      </div>
+
+      <div class="progress"><span id="bar"></span></div>
+      <div class="status"><span id="status">Ready</span><span id="step">0 / 9</span></div>
+      <div class="logpanel" id="log">Waiting for request…</div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  const ids=["nUser","c1","nOrch","c2","nBrokerTop","bTravel","nTravel","bFinance","nFinance","bCompliance","nCompliance","c3","nBrokerBottom","nMCP","pResource","pModel","nGuard","nModel"];
+  const $=id=>document.getElementById(id);
+  const chat=$("chat"), send=$("send"), input=$("prompt"), log=$("log"), status=$("status"), step=$("step"), bar=$("bar");
+  let timers=[], running=false;
+
+  function clearTimers(){timers.forEach(clearTimeout);timers=[]}
+  function resetVisual(){
+    clearTimers(); running=false; send.disabled=false;
+    ids.forEach(id=>{const e=$(id); if(e){e.classList.remove("active","done")}});
+    log.textContent="Waiting for request…"; status.textContent="Ready"; step.textContent="0 / 9"; bar.style.width="0";
+    chat.innerHTML='<div class="welcome"><h1>How can I help?</h1><p>Ask a question or request an action across company knowledge, travel, finance and policy systems.</p></div>';
+  }
+  function activate(id){const e=$(id);if(e){e.classList.add("active");setTimeout(()=>{e.classList.remove("active");e.classList.add("done")},500)}}
+  function line(txt){const d=document.createElement("div");d.className="logline";d.textContent=txt;log.appendChild(d);log.scrollTop=log.scrollHeight}
+  function userMsg(txt){const d=document.createElement("div");d.className="msg user";d.textContent=txt;chat.appendChild(d);chat.scrollTop=chat.scrollHeight}
+  function aiThinking(){const d=document.createElement("div");d.className="msg ai";d.id="thinking";d.innerHTML='<div class="thinking">Working across enterprise agents <span class="dot"></span><span class="dot"></span><span class="dot"></span></div>';chat.appendChild(d);chat.scrollTop=chat.scrollHeight}
+  function aiReply(){
+    const t=$("thinking"); if(t)t.remove();
+    const d=document.createElement("div");d.className="msg ai";d.innerHTML='<b>Trip planning completed.</b><br><br>• London travel is within policy, subject to manager approval.<br>• Project X has sufficient travel budget.<br>• Recommended itinerary and hotel options are ready.<br>• Charge code: <b>Project X / Travel</b>.<br><br>I can now present the approved options for booking.';
+    chat.appendChild(d);chat.scrollTop=chat.scrollHeight
+  }
+
+  function run(){
+    if(running)return;
+    running=true; send.disabled=true;
+    const txt=input.value.trim()||"Book me a business trip to London, follow company policy, and charge it to my project.";
+    chat.innerHTML=""; userMsg(txt); aiThinking(); log.textContent="";
+    const stages=[
+      [300, ()=>{activate("nUser");status.textContent="Request received";step.textContent="1 / 9";bar.style.width="10%";line("USER → Enterprise AI App: business travel request received")}],
+      [900, ()=>{activate("c1");activate("nOrch");status.textContent="Orchestrator decomposing task";step.textContent="2 / 9";bar.style.width="22%";line("Orchestrator: decompose into travel, finance and compliance tasks")}],
+      [1600,()=>{activate("c2");activate("nBrokerTop");status.textContent="Authorizing A2A relationships";step.textContent="3 / 9";bar.style.width="34%";line("AI Broker: caller=orchestrator-prod • authorize specialist A2A calls")}],
+      [2300,()=>{activate("bTravel");activate("nTravel");status.textContent="Travel Agent planning itinerary";step.textContent="4 / 9";bar.style.width="44%";line("A2A → Travel Agent: plan_trip(destination=London)") }],
+      [2900,()=>{activate("bFinance");activate("nFinance");status.textContent="Finance Agent checking project budget";step.textContent="5 / 9";bar.style.width="54%";line("A2A → Finance Agent: validate_cost_center(project=Project X)") }],
+      [3500,()=>{activate("bCompliance");activate("nCompliance");status.textContent="Compliance Agent validating policy";step.textContent="6 / 9";bar.style.width="64%";line("A2A → Compliance Agent: check_policy(international_travel)") }],
+      [4300,()=>{activate("c3");activate("nBrokerBottom");activate("nMCP");activate("pResource");status.textContent="Invoking approved enterprise tools";step.textContent="7 / 9";bar.style.width="76%";line("MCP → approved tools: travel search • project budget • policy lookup")}],
+      [5100,()=>{activate("pModel");activate("nGuard");activate("nModel");status.textContent="Inspecting LLM-bound content";step.textContent="8 / 9";bar.style.width="90%";line("Model path: prompt/response submitted to AI Guard DAS/API → ALLOW");line("LLM: synthesize compliant itinerary and project charge recommendation")}],
+      [6100,()=>{status.textContent="Workflow complete";step.textContent="9 / 9";bar.style.width="100%";line("Orchestrator: consolidate specialist results → final response");aiReply();send.disabled=false;running=false}]
+    ];
+    stages.forEach(([ms,fn])=>timers.push(setTimeout(fn,ms)));
+  }
+
+  send.addEventListener("click",run);
+  input.addEventListener("keydown",e=>{if(e.key==="Enter")run()});
+  $("reset").addEventListener("click",resetVisual);
+  $("replay").addEventListener("click",()=>{resetVisual();setTimeout(run,150)});
+  document.querySelectorAll(".chip").forEach(b=>b.addEventListener("click",()=>{input.value=b.dataset.prompt;input.focus()}));
+  resetVisual();
+})();
+</script>
+</body>
+</html>
